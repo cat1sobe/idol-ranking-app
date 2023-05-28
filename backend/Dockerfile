@@ -9,7 +9,6 @@ WORKDIR /app
 
 #GemfileをDocker環境にCOPYする（＊ADDはURLアクセスや解凍機能があるが、Gemfileに関しては不要と判断）
 COPY Gemfile /app/Gemfile
-COPY Gemfile.lock /app/Gemfile.lock
 
 RUN gem update --system \
  && gem install bundler:2.2.3 \

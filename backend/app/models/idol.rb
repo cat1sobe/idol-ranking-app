@@ -1,0 +1,2 @@
+class Idol < ApplicationRecord
+end
