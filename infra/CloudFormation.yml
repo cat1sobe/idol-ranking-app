@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: cloudformation
+
+Parameters:
+  rdsdbname:
+   Type: String
+   Description: Enter RDS DBname
+
+  rdsusername:
+    Type: String
+    Description: Enter RDS username
+    AllowedPattern: '[a-zA-Z0-9]*'
+
+  rdspassword: 
+    Type: String
+    Description: Enter RDS password
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+
+
+  
+Resources:
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.1.0.0/16
+
+  publicsubnet1:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: ap-northeast-1a
+      CidrBlock: 10.1.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+          - Key: Name
+            Value: publicsubnet1
+      VpcId: !Ref MyVPC
+
+  privatesubnet1:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: ap-northeast-1a
+      CidrBlock: 10.1.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+          - Key: Name
+            Value: privatesubnet1
+      VpcId: !Ref MyVPC
+
+  privatesubnet2:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: ap-northeast-1c
+      CidrBlock: 10.1.2.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+          - Key: Name
+            Value: privatesubnet2
+      VpcId: !Ref MyVPC
+
+
+  rdssubnetgroup: 
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: rdssubnetgroup
+      SubnetIds:  
+        - !Ref privatesubnet1
+        - !Ref privatesubnet2
+      DBSubnetGroupName: rdssubnetgroupname
+      Tags: 
+        - Key: Name
+          Value: rdssubnetgroup
+
+
+  rdssecuritygroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: rds-securitygroup
+      SecurityGroupEgress: 
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref lambdasecuritygroup
+      VpcId: !Ref MyVPC
+      
+
+  lambdasecuritygroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: get-idols-batch-lambda-securitygroup
+      GroupDescription: lambda-securitygroup
+      SecurityGroupEgress: 
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref MyVPC
+
+  rdsinstance:  
+    Type: AWS::RDS::DBInstance
+    Properties: 
+      AllocatedStorage: 20
+      DBInstanceClass: db.t2.micro
+      DBSubnetGroupName: 
+        !Ref rdssubnetgroup
+      DBName: !Ref rdsdbname
+      Engine: mysql
+      EngineVersion: "5.7"
+      MasterUsername: !Ref rdsusername
+      MasterUserPassword: !Ref rdspassword
+      StorageType: gp2
+      Tags:
+        - Key: Name
+          Value: rdsinstance
+      VPCSecurityGroups: 
+        - !Ref rdssecuritygroup
