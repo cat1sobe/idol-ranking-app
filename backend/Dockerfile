@@ -4,6 +4,9 @@ FROM ruby:3.0.0
 #Linuxなどで用いられるパッケージ管理ツール、最新情報にアップデートする
 RUN apt-get update -qq && apt-get install -y build-essential
 
+# # #docker上のcredentialsファイルを編集するため
+RUN apt-get install -y vim
+
 RUN mkdir /app
 WORKDIR /app
 
@@ -15,6 +18,7 @@ RUN gem update --system \
   && bundle config set force_ruby_platform true
 
 RUN bundle install
+
 
 #Dockerイメージとローカルとを紐付ける
 ADD . /app
