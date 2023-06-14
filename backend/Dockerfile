@@ -23,5 +23,20 @@ RUN bundle install
 #Dockerイメージとローカルとを紐付ける
 ADD . /app
 
+RUN mkdir -p tmp/sockets
+RUN mkdir tmp/pids
+
+# nginx
+RUN groupadd nginx
+RUN useradd -g nginx nginx
+ADD nginx/nginx.conf /etc/nginx/nginx.conf
+
+#コンテナがポート80でリクエストの待受が可能にする
+EXPOSE 80
+
+RUN chmod +x /app/entrypoint.sh
+
+CMD ["/app/entrypoint.sh"]
+
 
 

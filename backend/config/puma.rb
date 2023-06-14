@@ -36,3 +36,8 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 
 # Allow puma to be restarted by `rails restart` command.
 plugin :tmp_restart
+
+#pumaアプリケーションをunixドメインソケットにバインドしている。
+#unixドメインとは、ネットワークなしにプロセス間通信を行う仕組みのこと
+app_root = File.expand_path('..', __dir__)
+bind "unix://#{app_root}/tmp/sockets/puma.sock"
