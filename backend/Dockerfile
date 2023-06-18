@@ -2,7 +2,10 @@
 FROM ruby:3.0.0
 
 #Linuxなどで用いられるパッケージ管理ツール、最新情報にアップデートする
-RUN apt-get update -qq && apt-get install -y build-essential
+RUN apt-get update -qq && \
+  apt-get install -y build-essential \
+  sudo \
+  nginx
 
 # # #docker上のcredentialsファイルを編集するため
 RUN apt-get install -y vim
@@ -24,7 +27,7 @@ RUN bundle install
 ADD . /app
 
 RUN mkdir -p tmp/sockets
-RUN mkdir tmp/pids
+RUN mkdir -p tmp/pids
 
 # nginx
 RUN groupadd nginx
